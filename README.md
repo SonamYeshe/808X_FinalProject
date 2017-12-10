@@ -26,3 +26,8 @@ Jiawei Ge(SonamYeshe), hereby disclaims all copyright interest in the program `w
 
 ## Backlog google spreadsheet
 https://docs.google.com/a/terpmail.umd.edu/spreadsheets/d/1Yvd1-wER0aqfgY3TEJp908nOtQcfq_xC7EuNYKqGUYw/edit?usp=sharing
+
+## run the world
+```
+$ roslaunch finalproject turtlebot_corridor.launch world_file:=`rospack find finalproject`/worlds/corridor.world
+```
