@@ -30,4 +30,5 @@ https://docs.google.com/a/terpmail.umd.edu/spreadsheets/d/1Yvd1-wER0aqfgY3TEJp90
 ## run the world
 ```
 $ roslaunch finalproject turtlebot_corridor.launch world_file:=`rospack find finalproject`/worlds/corridor.world
+$ roslaunch finalproject turtlebot_corridor.launch world_file:=worlds/willowgarage.world
 ```
