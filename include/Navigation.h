@@ -22,12 +22,10 @@ typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseCl
 
 class Navigation {
  public:
-  Navigation(ros::NodeHandle& n, tf::TransformListener& list);
   void frontierCallback(const sensor_msgs::PointCloud frontier_cloud);
  protected:
   int getNearestFrontier(const sensor_msgs::PointCloud frontierGoal,
                          const tf::StampedTransform transform);
-  ros::Subscriber frontierSub;
   tf::TransformListener *tfListener;
 };
 

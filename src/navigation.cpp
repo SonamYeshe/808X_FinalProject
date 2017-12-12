@@ -16,12 +16,6 @@
 #include "../include/Navigation.h"
 #include "../include/finalproject/Frontier.h"
 
-Navigation::Navigation(ros::NodeHandle& n, tf::TransformListener& list) {
-  tfListener = &list;
-  frontierSub = n.subscribe("frontiers", 1, &Navigation::frontierCallback,
-                             this);
-}
-
 void Navigation::frontierCallback(
     const sensor_msgs::PointCloud frontierGoal) {
   tf::StampedTransform transform;
@@ -29,39 +23,40 @@ void Navigation::frontierCallback(
                                ros::Duration(3.0));
   tfListener->lookupTransform("/map", "/odom", ros::Time(0), transform);
   if (frontierGoal.points.size() == 0) {
-    return;
-  }
-  int nearestGoalNum = Navigation::getNearestFrontier(frontierGoal, transform);
-  ROS_INFO("Closest frontier: %d", nearestGoalNum);
-  move_base_msgs::MoveBaseGoal goal;
-  goal.target_pose.header.frame_id = "map";
-  goal.target_pose.header.stamp = ros::Time::now();
-  bool at_target = false;
-  int attempts = 0;
-  while (!at_target && attempts < 2) {
-    if (attempts >= 0) {
-      nearestGoalNum = (rand() % frontierGoal.points.size());
-      at_target = false;
+    MoveBaseClient ac("move_base", true);
+    while (!ac.waitForServer(ros::Duration(5))) {
+      ROS_INFO("Waiting for the move_base action server to come up");
     }
-    attempts++;
+    move_base_msgs::MoveBaseGoal goal;
+    goal.target_pose.header.frame_id = "map";
+    goal.target_pose.header.stamp = ros::Time::now();
+    goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
+        0, 0, 3.14);
+    ac.sendGoal(goal);
+    ac.waitForResult();
+  } else {
+    int nearestGoalNum = Navigation::getNearestFrontier(frontierGoal,
+                                                        transform);
+    ROS_INFO("Closest frontier: %d", nearestGoalNum);
+    MoveBaseClient ac("move_base", true);
+    while (!ac.waitForServer(ros::Duration(10.0))) {
+      ROS_INFO("Waiting for the move_base action server to come up");
+    }
+    move_base_msgs::MoveBaseGoal goal;
+    goal.target_pose.header.frame_id = "map";
+    goal.target_pose.header.stamp = ros::Time::now();
     goal.target_pose.pose.position.x = frontierGoal.points[nearestGoalNum].x;
     goal.target_pose.pose.position.y = frontierGoal.points[nearestGoalNum].y;
     goal.target_pose.pose.position.z = frontierGoal.points[nearestGoalNum].z;
     goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
         0, 0, 0);
-    ROS_INFO("Navigating to: x: %f y: %f", goal.target_pose.pose.position.x,
+    ROS_INFO("Sending goal......Navigating to: x: %f y: %f",
+             goal.target_pose.pose.position.x,
              goal.target_pose.pose.position.y);
-    actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac(
-        "move_base", true);
-    while (!ac.waitForServer(ros::Duration(10.0))) {
-      ROS_INFO("Waiting for the move_base action server to come up");
-    }
-    ROS_INFO("Sending goal");
     ac.sendGoal(goal);
     ac.waitForResult(ros::Duration(45.0));
     ROS_INFO("move_base goal published");
     if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
-      at_target = true;
       ROS_INFO("Hooray, the base has moved to %f,%f",
                goal.target_pose.pose.position.x,
                goal.target_pose.pose.position.y);
@@ -98,13 +93,10 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "turtlebotNavigation");
   ros::NodeHandle n;
   tf::TransformListener listener;
-  /*
-   * object the class Navigation
-   */
-  Navigation autoNavigator(n, listener);
-  ros::Subscriber autoNavigator_sub = n.subscribe("frontierGoal", 1,
+  Navigation autoNavigator;
+  ros::Subscriber autoNavigator_sub = n.subscribe("/frontierPossibilities", 1,
                                                   &Navigation::frontierCallback,
-                                                   this);
+                                                  &autoNavigator);
   ROS_INFO("INFO! Navigation Started");
   ros::Rate loop_rate(30);
   while (ros::ok() && n.ok()) {
