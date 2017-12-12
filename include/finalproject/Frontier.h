@@ -13,7 +13,14 @@
 #define FINALPROJECT_INCLUDE_FINALPROJECT_FRONTIER_H_
 #include <vector>
 #include "ros/ros.h"
+#include "ros/console.h"
 #include "nav_msgs/OccupancyGrid.h"
+#include "sensor_msgs/PointCloud.h"
+#include "actionlib/client/simple_action_client.h"
+#include "sensor_msgs/PointCloud.h"
+#include "move_base_msgs/MoveBaseAction.h"
+
+typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 
 class Frontier {
  public:
@@ -24,7 +31,7 @@ class Frontier {
    *  @param  const pointer to msg type nav_msgs/OccupancyGrid
    *  @return goal position in the map.
    */
-  int frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map);
+  void frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map);
 
   /**
    *  @brief  acquire data from /scan topic and a point in the map to distinguish is it's a frontier cell
@@ -42,6 +49,9 @@ class Frontier {
    *  @return void
    */
   void getNeibors(int neibors[], int position_num);
+
+ protected:
+  sensor_msgs::PointCloud frontierGoal;
 };
 
 #endif /* FINALPROJECT_INCLUDE_FINALPROJECT_FRONTIER_H_ */

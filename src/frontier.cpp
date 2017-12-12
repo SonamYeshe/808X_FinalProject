@@ -15,6 +15,7 @@
 #include "ros/ros.h"
 #include "../include/finalproject/Frontier.h"
 #include "nav_msgs/OccupancyGrid.h"
+#include "sensor_msgs/PointCloud.h"
 
 const int map_width = nav_msgs::MapMetaData::width;
 
@@ -23,7 +24,7 @@ const int map_width = nav_msgs::MapMetaData::width;
  *  @param  const pointer to msg type nav_msgs/OccupancyGrid
  *  @return goal position in the map.
  */
-int Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
+void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
   std::vector<int> frontierEdgeCell;
   /*
    * find all edge possibilities.
@@ -75,10 +76,10 @@ int Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
   for (int i = 0; i < frontierEdgeClose.size(); ++i) {
     std::map<int, int> x;
     std::map<int, int> y;
-    x[0] = frontierEdgeClose[i].front() / map_width;
-    x[1] = frontierEdgeClose[i].back() / map_width;
-    y[0] = frontierEdgeClose[i].front() % map_width;
-    y[1] = frontierEdgeClose[i].back() % map_width;
+    x[0] = frontierEdgeClose[i].front() % map_width;
+    x[1] = frontierEdgeClose[i].back() % map_width;
+    y[0] = frontierEdgeClose[i].front() / map_width;
+    y[1] = frontierEdgeClose[i].back() / map_width;
     double edgeLength = sqrt(
         (double(x[1] - x[0])) ^ 2 + (double(y[1] - y[0])) ^ 2)
         * map->info.resolution;
@@ -87,30 +88,16 @@ int Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
     }
   }
   /*
-   * get turtlebot position position in the map.
+   *
    */
-  int turtlebot_position = round(
-      -map->info.origin.position.y / map->info.resolution) * map_width
-      + round(map->info.origin.position.x / map->info.resolution);
-  /*
-   * compare then select the median point with minimal distance to the turtlebot.
-   */
-  double shortestLength = 1000000000000000;
-  int finalTarget;
+  Frontier::frontierGoal.points.resize(median.size());
   for (int i = 0; i < median.size(); ++i) {
-    std::map<int, int> x;
-    std::map<int, int> y;
-    x[0] = median[i] / map_width;
-    x[1] = turtlebot_position / map_width;
-    y[0] = median[i] % map_width;
-    y[1] = turtlebot_position % map_width;
-    double length = sqrt((double(x[1] - x[0])) ^ 2 + (double(y[1] - y[0])) ^ 2);
-    if (shortestLength > length) {
-      shortestLength = length;
-      finalTarget = i;
-    }
+    frontierGoal.points[i].x = ((median[i] % map_width)
+        + map->info.origin.position.x) * map->info.resolution;
+    frontierGoal.points[i].y = ((median[i] / map_width)
+        + map->info.origin.position.y) * map->info.resolution;
+    frontierGoal.points[i].z = 0;
   }
-  return median[finalTarget];
 }
 
 /**
@@ -156,4 +143,22 @@ void Frontier::getNeibors(int neibors[], int position_num) {
   neibors[5] = position_num + map_width - 1;
   neibors[6] = position_num + map_width;
   neibors[7] = position_num + map_width + 1;
+}
+
+int main(int argc, char **argv) {
+  ros::init(argc, argv, "frontierFinder");
+  ros::NodeHandle n;
+  Frontier frontierFinder;
+  ros::Publisher frontierPossibilities_pub = n
+      .advertise<sensor_msgs::PointCloud>("/frontierPossibilities", 1);
+  ros::Subscriber = n.subscribe("/map", 1, &Frontier::frontierTarget,
+                                &frontierFinder);
+  Frontier::frontierGoal.header.frame_id = "map";
+  ros::Rate loop_rate(30);
+  while (ros::ok() && n.ok()) {
+    frontierPossibilities_pub.publish(Frontier::frontierGoal);
+    ros::spinOnce();
+    loop_rate.sleep();
+  }
+  return 0;
 }
