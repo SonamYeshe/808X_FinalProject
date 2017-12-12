@@ -22,15 +22,17 @@ Navigation::Navigation(ros::NodeHandle& n, tf::TransformListener& list) {
                              this);
 }
 
-void frontierCallback(const sensor_msgs::PointCloud frontier_cloud) {
+void Navigation::frontierCallback(
+    const sensor_msgs::PointCloud frontierGoal) {
   tf::StampedTransform transform;
   tfListener->waitForTransform("/map", "/odom", ros::Time(0),
                                ros::Duration(3.0));
   tfListener->lookupTransform("/map", "/odom", ros::Time(0), transform);
-  if (frontier_cloud.points.size() == 0)
+  if (frontierGoal.points.size() == 0) {
     return;
-//TODO:retrieve the frontier target
-  ROS_INFO("Closest frontier: %d", frontier_i);
+  }
+  int nearestGoalNum = Navigation::getNearestFrontier(frontierGoal, transform);
+  ROS_INFO("Closest frontier: %d", nearestGoalNum);
   move_base_msgs::MoveBaseGoal goal;
   goal.target_pose.header.frame_id = "map";
   goal.target_pose.header.stamp = ros::Time::now();
@@ -38,14 +40,15 @@ void frontierCallback(const sensor_msgs::PointCloud frontier_cloud) {
   int attempts = 0;
   while (!at_target && attempts < 2) {
     if (attempts >= 0) {
-      frontier_i = (rand() % frontier_cloud.points.size());
+      nearestGoalNum = (rand() % frontierGoal.points.size());
       at_target = false;
     }
     attempts++;
-    goal.target_pose.pose.position.x = frontier_cloud.points[frontier_i].x;
-    goal.target_pose.pose.position.y = frontier_cloud.points[frontier_i].y;
-    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(0);
-    goal.target_pose.pose.orientation = odom_quat;
+    goal.target_pose.pose.position.x = frontierGoal.points[nearestGoalNum].x;
+    goal.target_pose.pose.position.y = frontierGoal.points[nearestGoalNum].y;
+    goal.target_pose.pose.position.z = frontierGoal.points[nearestGoalNum].z;
+    goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
+        0, 0, 0);
     ROS_INFO("Navigating to: x: %f y: %f", goal.target_pose.pose.position.x,
              goal.target_pose.pose.position.y);
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac(
@@ -53,19 +56,21 @@ void frontierCallback(const sensor_msgs::PointCloud frontier_cloud) {
     while (!ac.waitForServer(ros::Duration(10.0))) {
       ROS_INFO("Waiting for the move_base action server to come up");
     }
-    ROS_INFO("move_base action server active");
+    ROS_INFO("Sending goal");
     ac.sendGoal(goal);
     ac.waitForResult(ros::Duration(45.0));
     ROS_INFO("move_base goal published");
     if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
       at_target = true;
-      ROS_INFO("The base moved to %f,%f", goal.target_pose.pose.position.x,
+      ROS_INFO("Hooray, the base has moved to %f,%f",
+               goal.target_pose.pose.position.x,
                goal.target_pose.pose.position.y);
-      geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(
-          3.14);
-      goal.target_pose.pose.orientation = odom_quat;
+      goal.target_pose.pose.orientation =
+          tf::createQuaternionMsgFromRollPitchYaw(0, 0, 3.14);
       ac.sendGoal(goal);
       ac.waitForResult();
+    } else {
+      ROS_INFO("The base fail to move!");
     }
   }
 }
@@ -96,7 +101,10 @@ int main(int argc, char **argv) {
   /*
    * object the class Navigation
    */
-  Navigation walker(n, listener);
+  Navigation autoNavigator(n, listener);
+  ros::Subscriber autoNavigator_sub = n.subscribe("frontierGoal", 1,
+                                                  &Navigation::frontierCallback,
+                                                   this);
   ROS_INFO("INFO! Navigation Started");
   ros::Rate loop_rate(30);
   while (ros::ok() && n.ok()) {
@@ -105,36 +113,3 @@ int main(int argc, char **argv) {
   }
   return 0;
 }
-
-/*
- * get turtlebot position in the map.
- */
-/*
- int turtlebot_position = round(
- -map->info.origin.position.y / map->info.resolution) * map_width
- + round(map->info.origin.position.x / map->info.resolution);
- /*
- * compare then select the median point with minimal distance to the turtlebot.
- */
-/*
- double shortestLength = 1000000000000000;
- int finalTarget;
- for (int i = 0; i < median.size(); ++i) {
- std::map<int, int> x;
- std::map<int, int> y;
- x[0] = median[i] % map_width;
- x[1] = turtlebot_position % map_width;
- y[0] = median[i] / map_width;
- y[1] = turtlebot_position / map_width;
- double length = sqrt((double(x[1] - x[0])) ^ 2 + (double(y[1] - y[0])) ^ 2);
- if (shortestLength > length) {
- shortestLength = length;
- finalTarget = i;
- }
- }
- int frontierTarget = median[finalTarget];
- frontierGoal.points.resize(1);
- frontierGoal.points[0].x = frontierTarget % map_width;
- frontierGoal.points[0].y = frontierTarget / map_width;
- frontierGoal.points[0].z = 0;
- */
