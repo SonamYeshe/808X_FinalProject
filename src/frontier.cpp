@@ -1,10 +1,14 @@
 /**
  *  @file       frontier.cpp
- *  @brief      deduct a goal position where the turtlebot should go
- *  @details    when given a map, find the available frontier edges (with width larger than the diameter of the turtlebot) and select the median point in those edges with minimal moving distance
+ *  @brief      deduct some goal possibilities where the turtlebot should go
+ *  @details    when given a map, find the available frontier edges (with width
+ *  larger than the diameter of the turtlebot) and publish them with topic type
+ *  std_msgs::PointCloud
  *  @author     Jiawei Ge(SonamYeshe)
  *  @copyright  BSD, GNU Public License 2017 Jiawei Ge
- *  @disclaimer Jiawei Ge(SonamYeshe), hereby disclaims all copyright interest in the program `finalproject' (which makes passes at compilers) written by Jiawei Ge(SonamYeshe).
+ *  @disclaimer Jiawei Ge(SonamYeshe), hereby disclaims all copyright interest
+ *  in the program `finalproject' (which makes passes at compilers) written by
+ *  Jiawei Ge(SonamYeshe).
  <signature of Jiawei Ge>, 15 December 2017
  Jiawei Ge
  */
@@ -70,7 +74,8 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
     }
   }
   /*
-   * find median position of all the edges longer than 0.5m, which is a little bigger than turtlebot's diameter.
+   * find median position of all the edges longer than 0.5m, which is a
+   * little bigger than turtlebot's diameter.
    */
   std::vector<int> median;
   for (int i = 0; i < frontierEdgeClose.size(); ++i) {
@@ -88,20 +93,23 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
     }
   }
   /*
-   *
+   * set frontier possible values in frontierGoal msg
    */
   Frontier::frontierGoal.points.resize(median.size());
   for (int i = 0; i < median.size(); ++i) {
-    frontierGoal.points[i].x = ((median[i] % map_width)
-        + map->info.origin.position.x) * map->info.resolution;
-    frontierGoal.points[i].y = ((median[i] / map_width)
-        + map->info.origin.position.y) * map->info.resolution;
-    frontierGoal.points[i].z = 0;
+    frontierGoal.points[i].x = float(
+        ((median[i] % map_width) + map->info.origin.position.x)
+            * map->info.resolution);
+    frontierGoal.points[i].y = float(
+        ((median[i] / map_width) + map->info.origin.position.y)
+            * map->info.resolution);
+    frontierGoal.points[i].z = float(0);
   }
 }
 
 /**
- *  @brief  acquire data from /scan topic and a point in the map to distinguish is it's a frontier cell
+ *  @brief  acquire data from /scan topic and a point in the map to
+ *  distinguish is it's a frontier cell
  *  @param  const pointer to msg type nav_msgs/OccupancyGrid
  *  @param  integer of a point in the map
  *  @return void
@@ -110,7 +118,9 @@ bool Frontier::isFrontierEdgeCell(const nav_msgs::OccupancyGrid::ConstPtr& map,
                                   int position_num) {
   /**
    * define frontier edge cell to "be Any open cell adjacent to an unknown cell".
-   * Reference: B. Yamauchi, “A frontier based approach for autonomous exploration,” in IEEE Int. Symp. Computational Intelligence in Robotics and Automa-tion, Monterey, CA, Jul., 10–11 1997, p. 146.
+   * Reference: B. Yamauchi, “A frontier based approach for autonomous exploration,”
+   *  in IEEE Int. Symp. Computational Intelligence in Robotics and Automa-tion,
+   *  Monterey, CA, Jul., 10–11 1997, p. 146.
    */
   if (map->data[position_num] != 0) {
     return false;
@@ -149,6 +159,11 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "frontierFinder");
   ros::NodeHandle n;
   Frontier frontierFinder;
+  /**
+   * invoke a call to the ROS master node. register publishing to
+   * "/frontierPossibilities" and subscribing to "/map".
+   * size of the message queue are both 1 for subscriber and publisher.
+   */
   ros::Publisher frontierPossibilities_pub = n
       .advertise<sensor_msgs::PointCloud>("/frontierPossibilities", 1);
   ros::Subscriber = n.subscribe("/map", 1, &Frontier::frontierTarget,
