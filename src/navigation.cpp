@@ -1,9 +1,19 @@
-/*
- * navigation.cpp
- *
- *  Created on: Dec 11, 2017
- *      Author: sonamyeshe
+/**
+ *  @file       navigation.cpp
+ *  @brief      deduct closest frontier edge and ask turtlebot move to it's position
+ *  @details    subscribe to the /frontierPossibilities topic to get all possible
+ *  frontiers, select the optimal one with minimal distance to the turtlebot.
+ *  send a simple_navigation goal to ask turtlebot move to there. turtle bot should
+ *  first rotate 360 degrees to update original map.
+ *  @author     Jiawei Ge(SonamYeshe)
+ *  @copyright  BSD, GNU Public License 2017 Jiawei Ge
+ *  @disclaimer Jiawei Ge(SonamYeshe), hereby disclaims all copyright interest
+ *  in the program `finalproject' (which makes passes at compilers) written by
+ *  Jiawei Ge(SonamYeshe).
+ <signature of Jiawei Ge>, 15 December 2017
+ Jiawei Ge
  */
+
 #include "ros/ros.h"
 #include "ros/console.h"
 #include "nav_msgs/OccupancyGrid.h"
@@ -16,12 +26,24 @@
 #include "../include/Navigation.h"
 #include "../include/finalproject/Frontier.h"
 
+/**
+ *  @brief  acquire data from /frontierPossibilities topic and find the goal
+ *  position in the map. move turtlebot to that position finally.
+ *  @param  const msg type sensor_msgs::PointCloud
+ */
 void Navigation::frontierCallback(
     const sensor_msgs::PointCloud frontierGoal) {
+  /*
+   * listen to tf from /map to /odom to prepare turtlebot position conscience
+   */
   tf::StampedTransform transform;
   tfListener->waitForTransform("/map", "/odom", ros::Time(0),
                                ros::Duration(3.0));
   tfListener->lookupTransform("/map", "/odom", ros::Time(0), transform);
+  /*
+   *  /map topic start with all -1. frontierGoal is empty. rotate turtlebot
+   *  360 degree to update the /map topic
+   */
   if (frontierGoal.points.size() == 0) {
     MoveBaseClient ac("move_base", true);
     while (!ac.waitForServer(ros::Duration(5))) {
@@ -35,6 +57,10 @@ void Navigation::frontierCallback(
     ac.sendGoal(goal);
     ac.waitForResult();
   } else {
+    /*
+     * calculate the frontier cell with minimal distance to the turtlebot and
+     * using move_base to move turtlebot there.
+     */
     int nearestGoalNum = Navigation::getNearestFrontier(frontierGoal,
                                                         transform);
     ROS_INFO("Closest frontier: %d", nearestGoalNum);
@@ -56,6 +82,9 @@ void Navigation::frontierCallback(
     ac.sendGoal(goal);
     ac.waitForResult(ros::Duration(45.0));
     ROS_INFO("move_base goal published");
+    /*
+     * rotate turtlebot 360 degree after reach the frontier goal to update /map.
+     */
     if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
       ROS_INFO("Hooray, the base has moved to %f,%f",
                goal.target_pose.pose.position.x,
@@ -69,8 +98,11 @@ void Navigation::frontierCallback(
     }
   }
 }
+
 /*
- * compare then select the median point with minimal distance to the turtlebot.
+ *  @brief  compare then select the median point with minimal distance to the turtlebot.
+ *  @param  const msg type sensor_msgs::PointCloud
+ *  @param  const tf::StampedTransform
  */
 int Navigation::getNearestFrontier(const sensor_msgs::PointCloud frontierGoal,
                                    const tf::StampedTransform transform) {
@@ -89,6 +121,12 @@ int Navigation::getNearestFrontier(const sensor_msgs::PointCloud frontierGoal,
   return nearestGoalNum;
 }
 
+/**
+ *  @brief  acquire frontier possibilities and ask turtlebot move to the closet one.
+ *  @param  integer of argument count
+ *  @param  char pointer of argument value
+ *  @return a bool value
+ */
 int main(int argc, char **argv) {
   ros::init(argc, argv, "turtlebotNavigation");
   ros::NodeHandle n;
