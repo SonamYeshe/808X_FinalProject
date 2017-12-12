@@ -166,7 +166,8 @@ int main(int argc, char **argv) {
    */
   ros::Publisher frontierPossibilities_pub = n
       .advertise<sensor_msgs::PointCloud>("/frontierPossibilities", 1);
-  ros::Subscriber = n.subscribe("/map", 1, &Frontier::frontierTarget,
+  ros::Subscriber frontierPossibilities_sub = n.subscribe(
+      "/map", 1, &Frontier::frontierTarget,
                                 &frontierFinder);
   Frontier::frontierGoal.header.frame_id = "map";
   ros::Rate loop_rate(30);
