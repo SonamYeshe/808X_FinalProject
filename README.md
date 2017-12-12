@@ -23,6 +23,7 @@ Jiawei Ge(SonamYeshe), hereby disclaims all copyright interest in the program `w
 3. RViz version 1.12.13 (kinetic)
 4. Travis CI
 5. Coveralls.io
+6. ROS packages: gazebo_ros, turtlebot_navigation, turtlebot_gazebo, rviz, nodelet.
 
 ## Backlog google spreadsheet
 https://docs.google.com/a/terpmail.umd.edu/spreadsheets/d/1Yvd1-wER0aqfgY3TEJp908nOtQcfq_xC7EuNYKqGUYw/edit?usp=sharing
