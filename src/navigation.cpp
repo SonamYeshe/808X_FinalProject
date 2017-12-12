@@ -69,16 +69,30 @@ void frontierCallback(const sensor_msgs::PointCloud frontier_cloud) {
     }
   }
 }
+/*
+ * compare then select the median point with minimal distance to the turtlebot.
+ */
+int Navigation::getNearestFrontier(const sensor_msgs::PointCloud frontierGoal,
+                                   const tf::StampedTransform transform) {
+  int nearestGoalNum;
+  float shortestLength = 100000000000;
+  for (int i = 0; i < frontierGoal.points.size(); ++i) {
+    float length = sqrt(
+        (float(frontierGoal.points[i].x - transform.getOrigin().x()))
+            ^ 2 + (float(frontierGoal.points[i].y - transform.getOrigin().y()))
+            ^ 2);
+    if (length < shortestLength) {
+      shortestLength = length;
+      nearestGoalNum = i;
+    }
+  }
+  return nearestGoalNum;
+}
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "turtlebotNavigation");
   ros::NodeHandle n;
   tf::TransformListener listener;
-  Frontier frontierGoalCell;
-  ros::Publisher = n.advertise<sensor_msgs::PointCloud>("/frontierGoalCell", 1);
-  ros::Subscriber = n.subscribe("/map", 1, &Frontier::frontierTarget,
-                                &frontierGoalCell);
-  sensor_msgs::PointCloud::header.frame_id = "/map";
   /*
    * object the class Navigation
    */
@@ -86,9 +100,41 @@ int main(int argc, char **argv) {
   ROS_INFO("INFO! Navigation Started");
   ros::Rate loop_rate(30);
   while (ros::ok() && n.ok()) {
-    frontier_pub.publish(frontier_cloud);
     ros::spinOnce();
     loop_rate.sleep();
   }
   return 0;
 }
+
+/*
+ * get turtlebot position in the map.
+ */
+/*
+ int turtlebot_position = round(
+ -map->info.origin.position.y / map->info.resolution) * map_width
+ + round(map->info.origin.position.x / map->info.resolution);
+ /*
+ * compare then select the median point with minimal distance to the turtlebot.
+ */
+/*
+ double shortestLength = 1000000000000000;
+ int finalTarget;
+ for (int i = 0; i < median.size(); ++i) {
+ std::map<int, int> x;
+ std::map<int, int> y;
+ x[0] = median[i] % map_width;
+ x[1] = turtlebot_position % map_width;
+ y[0] = median[i] / map_width;
+ y[1] = turtlebot_position / map_width;
+ double length = sqrt((double(x[1] - x[0])) ^ 2 + (double(y[1] - y[0])) ^ 2);
+ if (shortestLength > length) {
+ shortestLength = length;
+ finalTarget = i;
+ }
+ }
+ int frontierTarget = median[finalTarget];
+ frontierGoal.points.resize(1);
+ frontierGoal.points[0].x = frontierTarget % map_width;
+ frontierGoal.points[0].y = frontierTarget / map_width;
+ frontierGoal.points[0].z = 0;
+ */
