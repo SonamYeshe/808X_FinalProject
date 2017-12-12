@@ -1,9 +1,14 @@
-/*
- * frontier.cpp
- *
- *  Created on: Dec 10, 2017
- *      Author: sonamyeshe
+/**
+ *  @file       frontier.cpp
+ *  @brief      deduct a goal position where the turtlebot should go
+ *  @details    when given a map, find the available frontier edges (with width larger than the diameter of the turtlebot) and select the median point in those edges with minimal moving distance
+ *  @author     Jiawei Ge(SonamYeshe)
+ *  @copyright  BSD, GNU Public License 2017 Jiawei Ge
+ *  @disclaimer Jiawei Ge(SonamYeshe), hereby disclaims all copyright interest in the program `finalproject' (which makes passes at compilers) written by Jiawei Ge(SonamYeshe).
+ <signature of Jiawei Ge>, 15 December 2017
+ Jiawei Ge
  */
+
 #include <vector>
 #include <map>
 #include <math.h>
@@ -12,18 +17,29 @@
 #include "nav_msgs/OccupancyGrid.h"
 
 const int map_width = nav_msgs::MapMetaData::width;
-// const int map_height = nav_msgs::MapMetaData::height;
 
+/**
+ *  @brief  acquire data from /map topic and find the goal position in the map.
+ *  @param  const pointer to msg type nav_msgs/OccupancyGrid
+ *  @return goal position in the map.
+ */
 int Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
   std::vector<int> frontierEdgeCell;
+  /*
+   * find all edge possibilities.
+   */
   for (int i = 0; i < map->data.size(); ++i) {
     if (isFrontierEdgeCell(map, i)) {
       frontierEdgeCell.push_back(i);
     }
   }
+  /*
+   * check every possibilities of connected cells and add them to different Open list,
+   * erase one position in an Open list after using it finding all connected edge cells.
+   * also erase it from frontierEdgeCell.
+   */
   std::vector<int> frontierEdgeOpen;
   std::map<int, std::vector<int> > frontierEdgeClose;
-
   for (int i = 0; frontierEdgeCell.size() > 0; ++i) {
     frontierEdgeOpen.push_back(frontierEdgeCell.back());
     while (!frontierEdgeOpen.empty()) {
@@ -52,7 +68,9 @@ int Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
       }
     }
   }
-//  std::vector<int> frontierEdgeAvailableNum;
+  /*
+   * find median position of all the edges longer than 0.5m, which is a little bigger than turtlebot's diameter.
+   */
   std::vector<int> median;
   for (int i = 0; i < frontierEdgeClose.size(); ++i) {
     std::map<int, int> x;
@@ -65,13 +83,18 @@ int Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
         (double(x[1] - x[0])) ^ 2 + (double(y[1] - y[0])) ^ 2)
         * map->info.resolution;
     if (edgeLength > 0.5) {
-//      frontierEdgeAvailableNum.push_back(i);
       median.push_back(frontierEdgeClose[i][frontierEdgeClose[i].size() / 2]);
     }
   }
+  /*
+   * get turtlebot position position in the map.
+   */
   int turtlebot_position = round(
       -map->info.origin.position.y / map->info.resolution) * map_width
       + round(map->info.origin.position.x / map->info.resolution);
+  /*
+   * compare then select the median point with minimal distance to the turtlebot.
+   */
   double shortestLength = 1000000000000000;
   int finalTarget;
   for (int i = 0; i < median.size(); ++i) {
@@ -90,8 +113,18 @@ int Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
   return median[finalTarget];
 }
 
+/**
+ *  @brief  acquire data from /scan topic and a point in the map to distinguish is it's a frontier cell
+ *  @param  const pointer to msg type nav_msgs/OccupancyGrid
+ *  @param  integer of a point in the map
+ *  @return void
+ */
 bool Frontier::isFrontierEdgeCell(const nav_msgs::OccupancyGrid::ConstPtr& map,
                                   int position_num) {
+  /**
+   * define frontier edge cell to "be Any open cell adjacent to an unknown cell".
+   * Reference: B. Yamauchi, “A frontier based approach for autonomous exploration,” in IEEE Int. Symp. Computational Intelligence in Robotics and Automa-tion, Monterey, CA, Jul., 10–11 1997, p. 146.
+   */
   if (map->data[position_num] != 0) {
     return false;
   } else {
@@ -105,7 +138,16 @@ bool Frontier::isFrontierEdgeCell(const nav_msgs::OccupancyGrid::ConstPtr& map,
   }
 }
 
+/**
+ *  @brief  deduct 8 neibors of a point in a map
+ *  @param  const pointer to msg type nav_msgs/OccupancyGrid
+ *  @param  integer of a point in the map
+ *  @return void
+ */
 void Frontier::getNeibors(int neibors[], int position_num) {
+  /*
+   * only get integer order number in the map, start from the upper left one.
+   */
   neibors[0] = position_num - map_width - 1;
   neibors[1] = position_num - map_width;
   neibors[2] = position_num - map_width + 1;
