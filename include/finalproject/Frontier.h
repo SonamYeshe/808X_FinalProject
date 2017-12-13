@@ -28,7 +28,6 @@ typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseCl
 
 class Frontier {
  public:
-  const int map_width;
 
   /**
    *  @brief  acquire data from /map topic and find the goal position in the map.
@@ -53,7 +52,8 @@ class Frontier {
    *  @param  integer of a point in the map
    *  @return void
    */
-  void getNeibors(int neibors[], int position_num);
+  void getNeibors(int neibors[], int position_num,
+                  const nav_msgs::OccupancyGrid::ConstPtr& map);
 
  protected:
   sensor_msgs::PointCloud frontierGoal;

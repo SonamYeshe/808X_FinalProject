@@ -21,7 +21,6 @@
 #include "nav_msgs/OccupancyGrid.h"
 #include "sensor_msgs/PointCloud.h"
 
-const int map_width = nav_msgs::MapMetaData::width;
 
 /**
  *  @brief  acquire data from /map topic and find the goal position in the map.
@@ -50,7 +49,7 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
     while (!frontierEdgeOpen.empty()) {
       int neibors[8];
       int frontierCellUsed = frontierEdgeOpen.front();
-      getNeibors(neibors, frontierCellUsed);
+      getNeibors(neibors, frontierCellUsed, map);
       for (int a = 0; a < 8; ++a) {
         for (int j = frontierEdgeCell.size() - 1; j >= 0; --j) {
           if (neibors[a] == frontierEdgeCell[j]) {
@@ -81,10 +80,10 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
   for (int i = 0; i < frontierEdgeClose.size(); ++i) {
     std::map<int, int> x;
     std::map<int, int> y;
-    x[0] = frontierEdgeClose[i].front() % map_width;
-    x[1] = frontierEdgeClose[i].back() % map_width;
-    y[0] = frontierEdgeClose[i].front() / map_width;
-    y[1] = frontierEdgeClose[i].back() / map_width;
+    x[0] = frontierEdgeClose[i].front() % map->info.width;
+    x[1] = frontierEdgeClose[i].back() % map->info.width;
+    y[0] = frontierEdgeClose[i].front() / map->info.width;
+    y[1] = frontierEdgeClose[i].back() / map->info.width;
     double edgeLength = sqrt(
         (double(x[1] - x[0])) ^ 2 + (double(y[1] - y[0])) ^ 2)
         * map->info.resolution;
@@ -98,10 +97,10 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
   Frontier::frontierGoal.points.resize(median.size());
   for (int i = 0; i < median.size(); ++i) {
     frontierGoal.points[i].x = float(
-        ((median[i] % map_width) + map->info.origin.position.x)
+        ((median[i] % map->info.width) + map->info.origin.position.x)
             * map->info.resolution);
     frontierGoal.points[i].y = float(
-        ((median[i] / map_width) + map->info.origin.position.y)
+        ((median[i] / map->info.width) + map->info.origin.position.y)
             * map->info.resolution);
     frontierGoal.points[i].z = float(0);
   }
@@ -126,7 +125,7 @@ bool Frontier::isFrontierEdgeCell(const nav_msgs::OccupancyGrid::ConstPtr& map,
     return false;
   } else {
     int neibors[8];
-    getNeibors(neibors, position_num);
+    getNeibors(neibors, position_num, map);
     for (int i = 0; i < 8; ++i) {
       if (neibors[i] == -1) {
         return true;
@@ -141,18 +140,19 @@ bool Frontier::isFrontierEdgeCell(const nav_msgs::OccupancyGrid::ConstPtr& map,
  *  @param  integer of a point in the map
  *  @return void
  */
-void Frontier::getNeibors(int neibors[], int position_num) {
+void Frontier::getNeibors(int neibors[], int position_num,
+                          const nav_msgs::OccupancyGrid::ConstPtr& map) {
   /*
    * only get integer order number in the map, start from the upper left one.
    */
-  neibors[0] = position_num - map_width - 1;
-  neibors[1] = position_num - map_width;
-  neibors[2] = position_num - map_width + 1;
+  neibors[0] = position_num - map->info.width - 1;
+  neibors[1] = position_num - map->info.width;
+  neibors[2] = position_num - map->info.width + 1;
   neibors[3] = position_num - 1;
   neibors[4] = position_num + 1;
-  neibors[5] = position_num + map_width - 1;
-  neibors[6] = position_num + map_width;
-  neibors[7] = position_num + map_width + 1;
+  neibors[5] = position_num + map->info.width - 1;
+  neibors[6] = position_num + map->info.width;
+  neibors[7] = position_num + map->info.width + 1;
 }
 
 int main(int argc, char **argv) {
