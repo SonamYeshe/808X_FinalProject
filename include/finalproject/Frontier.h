@@ -54,9 +54,7 @@ class Frontier {
    */
   void getNeibors(int neibors[], int position_num,
                   const nav_msgs::OccupancyGrid::ConstPtr& map);
-
- protected:
-  sensor_msgs::PointCloud frontierGoal;
+  static sensor_msgs::PointCloud frontierGoal;
 };
 
 #endif /* FINALPROJECT_INCLUDE_FINALPROJECT_FRONTIER_H_ */

@@ -21,7 +21,7 @@
 #include "nav_msgs/OccupancyGrid.h"
 #include "sensor_msgs/PointCloud.h"
 
-
+sensor_msgs::PointCloud Frontier::frontierGoal;
 /**
  *  @brief  acquire data from /map topic and find the goal position in the map.
  *  @param  const pointer to msg type nav_msgs/OccupancyGrid
@@ -84,8 +84,7 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
     x[1] = frontierEdgeClose[i].back() % map->info.width;
     y[0] = frontierEdgeClose[i].front() / map->info.width;
     y[1] = frontierEdgeClose[i].back() / map->info.width;
-    double edgeLength = sqrt(
-        (double(x[1] - x[0])) ^ 2 + (double(y[1] - y[0])) ^ 2)
+    float edgeLength = sqrt(float((x[1] - x[0]) ^ 2 + (y[1] - y[0]) ^ 2))
         * map->info.resolution;
     if (edgeLength > 0.5) {
       median.push_back(frontierEdgeClose[i][frontierEdgeClose[i].size() / 2]);

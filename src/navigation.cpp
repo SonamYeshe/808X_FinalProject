@@ -109,9 +109,9 @@ int Navigation::getNearestFrontier(const sensor_msgs::PointCloud frontierGoal,
   float shortestLength = 100000000000;
   for (int i = 0; i < frontierGoal.points.size(); ++i) {
     float length = sqrt(
-        (float(frontierGoal.points[i].x - transform.getOrigin().x()))
-            ^ 2 + (float(frontierGoal.points[i].y - transform.getOrigin().y()))
-            ^ 2);
+        pow((float(frontierGoal.points[i].x - transform.getOrigin().x())), 2)
+            + pow((float(frontierGoal.points[i].y - transform.getOrigin().y())),
+                  2));
     if (length < shortestLength) {
       shortestLength = length;
       nearestGoalNum = i;
