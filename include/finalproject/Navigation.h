@@ -37,7 +37,6 @@ class Navigation {
    *  @param  const msg type sensor_msgs::PointCloud
    */
   void frontierCallback(const sensor_msgs::PointCloud frontier_cloud);
- protected:
 
   /*
    *  @brief  compare then select the median point with minimal distance to the turtlebot.
