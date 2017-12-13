@@ -25,6 +25,7 @@
 #include "actionlib/client/simple_action_client.h"
 #include "../include/finalproject/Navigation.h"
 
+typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 /**
  *  @brief  acquire data from /frontierPossibilities topic and find the goal
  *  position in the map. move turtlebot to that position finally.
@@ -53,8 +54,10 @@ void Navigation::frontierCallback(
     goal.target_pose.header.stamp = ros::Time::now();
     goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
         0, 0, 3.14);
+    ROS_INFO("come up 2");
     ac.sendGoal(goal);
     ac.waitForResult();
+    ROS_INFO("come up 3");
   } else {
     /*
      * calculate the frontier cell with minimal distance to the turtlebot and
@@ -131,12 +134,14 @@ int main(int argc, char **argv) {
   ros::NodeHandle n;
   tf::TransformListener listener;
   Navigation autoNavigator;
+  autoNavigator.tfListener = &listener;
   ros::Subscriber autoNavigator_sub = n.subscribe("/frontierPossibilities", 1,
                                                   &Navigation::frontierCallback,
                                                   &autoNavigator);
   ROS_INFO("INFO! Navigation Started");
   ros::Rate loop_rate(30);
   while (ros::ok() && n.ok()) {
+    ROS_INFO("come up 1");
     ros::spinOnce();
     loop_rate.sleep();
   }
