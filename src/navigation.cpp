@@ -23,8 +23,7 @@
 #include "sensor_msgs/PointCloud.h"
 #include "move_base_msgs/MoveBaseAction.h"
 #include "actionlib/client/simple_action_client.h"
-#include "../include/Navigation.h"
-#include "../include/finalproject/Frontier.h"
+#include "../include/finalproject/Navigation.h"
 
 /**
  *  @brief  acquire data from /frontierPossibilities topic and find the goal
