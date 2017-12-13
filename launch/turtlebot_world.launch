@@ -51,6 +51,5 @@
     <remap from="scan" to="/scan"/>
   </node>
   
-  <node pkg = "finalproject" type = "frontierFinder" name = "frontierFinder">
-  <node pkg = "finalproject" type = "turtlebotNavigation" name = "turtlebotNavigation">
+
 </launch>
