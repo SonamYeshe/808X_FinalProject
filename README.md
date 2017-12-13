@@ -33,3 +33,8 @@ https://docs.google.com/a/terpmail.umd.edu/spreadsheets/d/1Yvd1-wER0aqfgY3TEJp90
 $ roslaunch finalproject turtlebot_world.launch world_file:=`rospack find finalproject`/worlds/corridor.world
 $ roslaunch finalproject turtlebot_world.launch world_file:=`rospack find finalproject`/worlds/willowgarage.world
 ```
+
+
+
+It will install all the packages you need to run the navigation stack:
+sudo apt-get install ros-kinetic-navigation
