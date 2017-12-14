@@ -23,7 +23,8 @@ Jiawei Ge(SonamYeshe), hereby disclaims all copyright interest in the program `w
 3. RViz version 1.12.13 (kinetic)
 4. Travis CI
 5. Coveralls.io
-6. ROS packages: gazebo_ros, turtlebot_navigation, turtlebot_gazebo, rviz, nodelet.
+6. ROS packages: stage_ros, rviz, slam_gmapping, move_base, 
+gazebo_ros, turtlebot_navigation, turtlebot_gazebo, rviz, nodelet.
 
 ## Backlog google spreadsheet
 https://docs.google.com/a/terpmail.umd.edu/spreadsheets/d/1Yvd1-wER0aqfgY3TEJp908nOtQcfq_xC7EuNYKqGUYw/edit?usp=sharing
@@ -36,5 +37,3 @@ $ roslaunch finalproject turtlebot_world.launch world_file:=`rospack find finalp
 
 
 
-It will install all the packages you need to run the navigation stack:
-sudo apt-get install ros-kinetic-navigation

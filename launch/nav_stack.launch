@@ -7,21 +7,21 @@
   <arg name="gui" default="true"/>
   <arg name="stacks"    value="$(optenv TURTLEBOT_STACKS hexagons)"/>  <!-- circles, hexagons --> 
   <arg name="3d_sensor" value="$(optenv TURTLEBOT_3D_SENSOR kinect)"/>  <!-- kinect, asus_xtion_pro --> 
-  <arg name="custom_gmapping_launch_file" default="$(find finalproject)/gmapping/$(arg 3d_sensor)_gmapping.launch.xml"/>
+  <arg name="custom_gmapping_launch_file" default="$(find finalproject)/launch/includes/gmapping/$(arg 3d_sensor)_gmapping.launch.xml"/>
 
   <!-- Open Rviz to visualize what happens in the Gazebo world -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turtlebot_rviz_launchers)/rviz/navigation.rviz">
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find finalproject)/rviz/navigation.rviz">
      <remap from="scan" to="/base_scan"/>
   </node>
 
 
-  <!-- Open world file-->
-  <node pkg="stage_ros" type="stageros" name="stageros" args="$(find turtlebot_explorer)/world/swarmlab.world" respawn="false">
+  <!-- Open rosstage using swarmlab world-->
+  <node pkg="stage_ros" type="stageros" name="stageros" args="$(find finalproject)/worlds/swarmlab.world" respawn="false">
   	<param name="base_watchdog_timeout" value=".2"/>
   </node>
 
   <!-- Setup navigation stack -->
-  <include file="$(find turtlebot_explorer)/config/move_base.xml" />
+  <include file="$(find finalproject)/config/move_base.xml" />
 
   <!-- Open gmapping function supported by turtlebot_navigation package-->
   <include file="$(arg custom_gmapping_launch_file)">
