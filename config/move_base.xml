@@ -10,8 +10,5 @@ Example move_base configuration. Descriptions of parameters, as well as a full l
 	<rosparam file="$(find finalproject)/config/local_costmap_params.yaml" command="load" />
 	<rosparam file="$(find finalproject)/config/global_costmap_params.yaml" command="load" />
 	<rosparam file="$(find finalproject)/config/base_local_planner_params.yaml" command="load" />
-<!--
-<rosparam file="$(find navigation_stage)/move_base_config/dwa_local_planner_params.yaml" command="load" />
--->
 </node>
 </launch>
