@@ -13,9 +13,9 @@
  Jiawei Ge
  */
 
+#include <math.h>
 #include <vector>
 #include <map>
-#include <math.h>
 #include "ros/ros.h"
 #include "../include/finalproject/Frontier.h"
 #include "nav_msgs/OccupancyGrid.h"
@@ -133,7 +133,7 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
         ((median[i] / map->info.width)
             + map->info.origin.position.y / map->info.resolution)
             * map->info.resolution);
-    frontierGoal.points[i].z = float(0);
+    frontierGoal.points[i].z = static_cast<float>(0);
   }
   ROS_INFO("The positions of frontier median points have been published!");
 }

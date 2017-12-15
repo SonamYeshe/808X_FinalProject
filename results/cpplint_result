@@ -1,0 +1,6 @@
+../cpplint.py $( find . -name \*.hpp -or -name \*.cpp | grep -vE -e "^./build/" -e "^./vendor/" -e "^./docs/" -e "^./results" )
+Done processing ./test/frontier_test.cpp
+Done processing ./test/navigation_test.cpp
+Done processing ./src/navigation.cpp
+Done processing ./src/frontier.cpp
+Total errors found: 0

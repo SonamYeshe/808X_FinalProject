@@ -86,8 +86,12 @@ int Navigation::getNearestFrontier(const sensor_msgs::PointCloud frontierGoal,
   float shortestLength = 1000000000;
   for (int i = 0; i < frontierGoal.points.size(); ++i) {
     float length = sqrt(
-        pow((float(frontierGoal.points[i].x - transform.getOrigin().x())), 2.0)
-            + pow((float(frontierGoal.points[i].y - transform.getOrigin().y())),
+        pow((static_cast<float>(frontierGoal.points[i].x
+                - transform.getOrigin().x())),
+            2.0)
+            + pow(
+                (static_cast<float>(frontierGoal.points[i].y
+                    - transform.getOrigin().y())),
                   2.0));
     if (length > 1.25 && length < shortestLength) {
       shortestLength = length;
