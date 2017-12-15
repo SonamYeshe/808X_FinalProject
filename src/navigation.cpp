@@ -58,7 +58,7 @@ void Navigation::frontierCallback(
   goal.target_pose.pose.position.y = frontierGoal.points[nearestGoalNum].y;
   goal.target_pose.pose.position.z = frontierGoal.points[nearestGoalNum].z;
   goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
-      0, 0, 0);
+      0, 0, 1);
   ROS_INFO("Sending goal......Navigating to: x: %f y: %f",
            goal.target_pose.pose.position.x, goal.target_pose.pose.position.y);
   MoveBaseClient ac("move_base", true);
@@ -66,7 +66,7 @@ void Navigation::frontierCallback(
     ROS_INFO("Waiting for the move_base action server to come up");
   }
   ac.sendGoal(goal);
-  ac.waitForResult(ros::Duration(15.0));
+  ac.waitForResult(ros::Duration(30.0));
   ROS_INFO("move_base goal published");
   if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
     ROS_INFO("Hooray, the base has moved to %f,%f",
@@ -76,54 +76,6 @@ void Navigation::frontierCallback(
     ROS_INFO("Update the goal. Frontiers has been refreshed.");
   }
 }
-  /*
-   * set bool value at_target to be false in the beginning to ask the turtlebot
-   * to go somewhere else.
-   */
-/*
-  bool at_target = false;
-  int attempts = 0;
-  while (!at_target && attempts < 2) {
-    if (attempts >= 0) {
-      nearestGoalNum = (rand() % frontierGoal.points.size());
-      at_target = false;
-    }
-    attempts++;
-    goal.target_pose.pose.position.x = frontierGoal.points[nearestGoalNum].x;
-    goal.target_pose.pose.position.y = frontierGoal.points[nearestGoalNum].y;
-    goal.target_pose.pose.position.z = frontierGoal.points[nearestGoalNum].z;
-    goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
-        0, 0, 0);
-    ROS_INFO("Sending goal......Navigating to: x: %f y: %f",
-             goal.target_pose.pose.position.x,
-             goal.target_pose.pose.position.y);
-    MoveBaseClient ac("move_base", true);
-    while (!ac.waitForServer(ros::Duration(10.0))) {
-      ROS_INFO("Waiting for the move_base action server to come up");
-    }
-    ac.sendGoal(goal);
-    ac.waitForResult(ros::Duration(45.0));
-    ROS_INFO("move_base goal published");
- */
-    /*
-     * rotate turtlebot 360 degree after reach the frontier goal to update /map.
-     */
-/*
-    if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
-      at_target = true;
-      ROS_INFO("Hooray, the base has moved to %f,%f",
-               goal.target_pose.pose.position.x,
-               goal.target_pose.pose.position.y);
-      goal.target_pose.pose.orientation =
-          tf::createQuaternionMsgFromRollPitchYaw(0, 0, 3.14);
-      ac.sendGoal(goal);
-      ac.waitForResult();
-    } else {
-      ROS_INFO("The base failed to move to the target for some reason");
-    }
-  }
-}
- */
 /*
  *  @brief  compare then select the median point with minimal distance to the turtlebot.
  *  @param  const msg type sensor_msgs::PointCloud
@@ -139,7 +91,7 @@ int Navigation::getNearestFrontier(const sensor_msgs::PointCloud frontierGoal,
         pow((float(frontierGoal.points[i].x - transform.getOrigin().x())), 2.0)
             + pow((float(frontierGoal.points[i].y - transform.getOrigin().y())),
                   2.0));
-    if (length > 1.5 && length < shortestLength) {
+    if (length > 1.25 && length < shortestLength) {
       shortestLength = length;
       nearestGoalNum = i;
     }
