@@ -28,6 +28,7 @@ sensor_msgs::PointCloud Frontier::frontierGoal;
  *  @return goal position in the map.
  */
 void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
+  int map_width = map->info.width;
   std::vector<int> frontierEdgeCell;
   /*
    * find all edge possibilities.
@@ -37,6 +38,8 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
       frontierEdgeCell.push_back(i);
     }
   }
+  int q1 = frontierEdgeCell.size();
+  ROS_INFO("sssssssss , %d", q1);
   /*
    * check every possibilities of connected cells and add them to different Open list,
    * erase one position in an Open list after using it finding all connected edge cells.
@@ -44,18 +47,35 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
    */
   std::vector<int> frontierEdgeOpen;
   std::map<int, std::vector<int> > frontierEdgeClose;
-  for (int i = 0; frontierEdgeCell.size() > 0; ++i) {
+  int i = 0;
+  while (frontierEdgeCell.size() > 0) {
     frontierEdgeOpen.push_back(frontierEdgeCell.back());
-    while (!frontierEdgeOpen.empty()) {
+    while (frontierEdgeOpen.size() != 0) {
       int neibors[8];
       int frontierCellUsed = frontierEdgeOpen.front();
-      getNeibors(neibors, frontierCellUsed, map);
+      getNeibors(neibors, frontierCellUsed, map_width);
       for (int a = 0; a < 8; ++a) {
         for (int j = frontierEdgeCell.size() - 1; j >= 0; --j) {
           if (neibors[a] == frontierEdgeCell[j]) {
+            int kcount = 0;
             for (int k = 0; k < frontierEdgeOpen.size(); ++k) {
-              if (neibors[a] != frontierEdgeOpen[k]) {
-                frontierEdgeOpen.push_back(neibors[a]);
+              if (frontierEdgeOpen[k] != neibors[a]) {
+                kcount += 1;
+              }
+              if (kcount == frontierEdgeOpen.size()) {
+                if (frontierEdgeClose[i].size() != 0) {
+                  int lcount = 0;
+                  for (int l = 0; l < frontierEdgeClose[i].size(); ++l) {
+                    if (frontierEdgeClose[i][l] != neibors[a]) {
+                      lcount += 1;
+                    }
+                    if (lcount == frontierEdgeClose[i].size()) {
+                      frontierEdgeOpen.push_back(neibors[a]);
+                    }
+                  }
+                } else {
+                  frontierEdgeOpen.push_back(neibors[a]);
+                }
               }
             }
           }
@@ -71,9 +91,13 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
         }
       }
     }
+    i += 1;
+    ROS_INFO("cut!");
   }
+  int z = frontierEdgeClose.size();
+  ROS_INFO("come up %d", z);
   /*
-   * find median position of all the edges longer than 0.5m, which is a
+   * find median position of all the edges longer than 0.2m, which is a
    * little bigger than turtlebot's diameter.
    */
   std::vector<int> median;
@@ -86,10 +110,16 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
     y[1] = frontierEdgeClose[i].back() / map->info.width;
     float edgeLength = sqrt(float((x[1] - x[0]) ^ 2 + (y[1] - y[0]) ^ 2))
         * map->info.resolution;
-    if (edgeLength > 0.5) {
+    if (edgeLength > 0.2) {
       median.push_back(frontierEdgeClose[i][frontierEdgeClose[i].size() / 2]);
     }
   }
+  int x = median.size();
+  int x1 = median[0];
+  int x2 = median[1];
+  int x3 = median[2];
+  int x4 = median[3];
+  ROS_INFO("median size %d,%d,%d,%d,%d", x, x1, x2, x3, x4);
   /*
    * set frontier possible values in frontierGoal msg
    */
@@ -103,6 +133,16 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
             * map->info.resolution);
     frontierGoal.points[i].z = float(0);
   }
+  float y1 = Frontier::frontierGoal.points[0].x;
+  float y2 = Frontier::frontierGoal.points[0].y;
+  float y3 = Frontier::frontierGoal.points[1].x;
+  float y4 = Frontier::frontierGoal.points[1].y;
+  float y5 = Frontier::frontierGoal.points[2].x;
+  float y6 = Frontier::frontierGoal.points[2].y;
+  float y7 = Frontier::frontierGoal.points[3].x;
+  float y8 = Frontier::frontierGoal.points[3].y;
+  ROS_INFO("points size %f,%f,%f,%f,%f,%f,%f,%f", y1, y2, y3, y4, y5, y6, y7,
+           y8);
 }
 
 /**
@@ -124,10 +164,13 @@ bool Frontier::isFrontierEdgeCell(const nav_msgs::OccupancyGrid::ConstPtr& map,
     return false;
   } else {
     int neibors[8];
-    getNeibors(neibors, position_num, map);
+    int map_width = map->info.width;
+    getNeibors(neibors, position_num, map_width);
     for (int i = 0; i < 8; ++i) {
-      if (neibors[i] == -1) {
-        return true;
+      if (neibors[i] >= 0 && neibors[i] < map->data.size()) {
+        if (map->data[neibors[i]] == -1) {
+          return true;
+        }
       }
     }
   }
@@ -140,18 +183,18 @@ bool Frontier::isFrontierEdgeCell(const nav_msgs::OccupancyGrid::ConstPtr& map,
  *  @return void
  */
 void Frontier::getNeibors(int neibors[], int position_num,
-                          const nav_msgs::OccupancyGrid::ConstPtr& map) {
+                          int map_width) {
   /*
    * only get integer order number in the map, start from the upper left one.
    */
-  neibors[0] = position_num - map->info.width - 1;
-  neibors[1] = position_num - map->info.width;
-  neibors[2] = position_num - map->info.width + 1;
+  neibors[0] = position_num - map_width - 1;
+  neibors[1] = position_num - map_width;
+  neibors[2] = position_num - map_width + 1;
   neibors[3] = position_num - 1;
   neibors[4] = position_num + 1;
-  neibors[5] = position_num + map->info.width - 1;
-  neibors[6] = position_num + map->info.width;
-  neibors[7] = position_num + map->info.width + 1;
+  neibors[5] = position_num + map_width - 1;
+  neibors[6] = position_num + map_width;
+  neibors[7] = position_num + map_width + 1;
 }
 
 int main(int argc, char **argv) {

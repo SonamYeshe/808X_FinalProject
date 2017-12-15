@@ -20,11 +20,6 @@
 #include "ros/console.h"
 #include "nav_msgs/OccupancyGrid.h"
 #include "sensor_msgs/PointCloud.h"
-#include "actionlib/client/simple_action_client.h"
-#include "sensor_msgs/PointCloud.h"
-#include "move_base_msgs/MoveBaseAction.h"
-
-typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 
 class Frontier {
  public:
@@ -53,7 +48,7 @@ class Frontier {
    *  @return void
    */
   void getNeibors(int neibors[], int position_num,
-                  const nav_msgs::OccupancyGrid::ConstPtr& map);
+                  int map_width);
   static sensor_msgs::PointCloud frontierGoal;
 };
 
