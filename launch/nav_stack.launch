@@ -34,4 +34,7 @@
     <arg name = "scan_topic" value = "base_scan"/>
   </include>
 
+  <node pkg="finalproject" type="frontierFinder" name="frontierFinder" output="screen" />
+  <node pkg="finalproject" type="turtlebotNavigator" name="turtlebotNavigator" output="screen" />
+
 </launch>

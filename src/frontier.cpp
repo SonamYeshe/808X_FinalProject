@@ -82,7 +82,10 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
       frontierEdgeClose[i].push_back(frontierCellUsed);
       frontierEdgeOpen.erase(frontierEdgeOpen.begin());
     }
-
+    /*
+     * delete all points in the frontierEdgeCell after adding them
+     * into the frontierEdgeClose.
+     */
     for (int j = 0; j < frontierEdgeClose[i].size(); ++j) {
       for (int k = 0; k < frontierEdgeCell.size(); ++k) {
         if (frontierEdgeClose[i][j] == frontierEdgeCell[k]) {
@@ -93,11 +96,12 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
     i += 1;
   }
   /*
-   * find median position of all the edges longer than 0.2m, which is a
+   * find median position of all the edges longer than 0.1m, which is a
    * little bigger than turtlebot's diameter.
    */
   std::vector<int> median;
   for (int i = 0; i < frontierEdgeClose.size(); ++i) {
+    /*
     std::map<int, int> x;
     std::map<int, int> y;
     x[0] = frontierEdgeClose[i].front() % map->info.width;
@@ -106,7 +110,11 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
     y[1] = frontierEdgeClose[i].back() / map->info.width;
     float edgeLength = sqrt(float((x[1] - x[0]) ^ 2 + (y[1] - y[0]) ^ 2))
         * map->info.resolution;
-    if (edgeLength > 0.2) {
+    if (edgeLength > 0.1) {
+      median.push_back(frontierEdgeClose[i][frontierEdgeClose[i].size() / 2]);
+    }
+     */
+    if (frontierEdgeClose[i].size() > 2) {
       median.push_back(frontierEdgeClose[i][frontierEdgeClose[i].size() / 2]);
     }
   }
@@ -116,10 +124,12 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
   Frontier::frontierGoal.points.resize(median.size());
   for (int i = 0; i < median.size(); ++i) {
     frontierGoal.points[i].x = float(
-        ((median[i] % map->info.width) + map->info.origin.position.x)
+        ((median[i] % map->info.width)
+            + map->info.origin.position.x / map->info.resolution)
             * map->info.resolution);
     frontierGoal.points[i].y = float(
-        ((median[i] / map->info.width) + map->info.origin.position.y)
+        ((median[i] / map->info.width)
+            + map->info.origin.position.y / map->info.resolution)
             * map->info.resolution);
     frontierGoal.points[i].z = float(0);
   }
@@ -178,6 +188,13 @@ void Frontier::getNeibors(int neibors[], int position_num,
   neibors[7] = position_num + map_width + 1;
 }
 
+/**
+ *  @brief  get info from /map and calculate the available frontiers' median
+ *  points for the turtlebot.
+ *  @param  integer of argument count
+ *  @param  char pointer of argument value
+ *  @return a bool value
+ */
 int main(int argc, char **argv) {
   ros::init(argc, argv, "frontierFinder");
   ros::NodeHandle n;

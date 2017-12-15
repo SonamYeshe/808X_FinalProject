@@ -141,8 +141,8 @@ include_directories(
 add_executable(frontierFinder src/frontier.cpp)
 target_link_libraries(frontierFinder ${catkin_LIBRARIES})
 
-add_executable(turtlebotNavigation src/navigation.cpp)
-target_link_libraries(turtlebotNavigation ${catkin_LIBRARIES})
+add_executable(turtlebotNavigator src/navigation.cpp)
+target_link_libraries(turtlebotNavigator ${catkin_LIBRARIES})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context

@@ -18,6 +18,9 @@
 #define FINALPROJECT_INCLUDE_NAVIGATION_H_
 #include "ros/ros.h"
 #include "ros/console.h"
+#include <cstdlib>
+#include "geometry_msgs/Twist.h"
+#include "sensor_msgs/LaserScan.h"
 #include "nav_msgs/OccupancyGrid.h"
 #include "tf/transform_broadcaster.h"
 #include "tf/transform_listener.h"
