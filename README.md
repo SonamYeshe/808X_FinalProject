@@ -35,5 +35,7 @@ $ roslaunch finalproject turtlebot_world.launch world_file:=`rospack find finalp
 $ roslaunch finalproject turtlebot_world.launch world_file:=`rospack find finalproject`/worlds/willowgarage.world
 ```
 
+roslaunch finalproject nav_stack.launch
+
 
 

@@ -46,7 +46,8 @@ class Navigation {
    *  @param  const msg type sensor_msgs::PointCloud
    *  @param  const tf::StampedTransform
    */
-  int getNearestFrontier(const sensor_msgs::PointCloud frontierGoal,
+  int getNearestFrontier(
+      const sensor_msgs::PointCloud frontierGoal,
                          const tf::StampedTransform transform);
   tf::TransformListener *tfListener;
 };

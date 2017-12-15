@@ -16,13 +16,13 @@ global_costmap:
   raytrace_range: 3.0
   robot_radius: 0.18
   #footprint: [[0.21, 0.21], [-0.21, 0.21], [-0.21, -0.21], [0.21, -0.21]]
-  inflation_radius: 0.3
+  inflation_radius: 0.4
   footprint_padding: 0.01
 
   
   #robot_radius: 0.18
   # footprint: [[0.17, 0.17], [-0.17, 0.17], [-0.17, -0.17], [0.17, -0.17]]
-  #inflation_radius: 0.20
+  #inflation_radius: 0.30
   #footprint_padding: 0.01
 
   observation_sources: laser_scan_sensor 
