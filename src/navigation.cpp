@@ -52,8 +52,6 @@ void Navigation::frontierCallback(
   move_base_msgs::MoveBaseGoal goal;
   goal.target_pose.header.frame_id = "map";
   goal.target_pose.header.stamp = ros::Time::now();
-
-
   goal.target_pose.pose.position.x = frontierGoal.points[nearestGoalNum].x;
   goal.target_pose.pose.position.y = frontierGoal.points[nearestGoalNum].y;
   goal.target_pose.pose.position.z = frontierGoal.points[nearestGoalNum].z;
