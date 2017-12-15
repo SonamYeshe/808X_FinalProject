@@ -1,0 +1,6 @@
+<launch>
+	
+  <node pkg="finalproject" type="frontierFinder" name="frontierFinder" output="screen" />
+  <test pkg="finalproject" type="frontier_test" test-name="frontier_test"/>
+
+</launch>

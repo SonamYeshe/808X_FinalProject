@@ -211,3 +211,16 @@ target_link_libraries(turtlebotNavigator ${catkin_LIBRARIES})
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  include_directories(${CMAKE_INSTALL_PREFIX}/include)
+
+  add_rostest_gtest(frontier_test test/frontier_test.launch test/frontier_test.cpp)
+  target_link_libraries(frontier_test ${catkin_LIBRARIES})
+  add_dependencies(frontier_test ${catkin_EXPORTED_TARGETS})
+
+  add_rostest_gtest(navigation_test test/navigation_test.launch test/navigation_test.cpp)
+  target_link_libraries(navigation_test ${catkin_LIBRARIES})
+  add_dependencies(navigation_test ${catkin_EXPORTED_TARGETS})
+endif()

@@ -1,0 +1,6 @@
+<launch>
+	
+  <node pkg="finalproject" type="turtlebotNavigator" name="turtlebotNavigator" output="screen" />
+  <test pkg="finalproject" type="navigation_test" test-name="navigation_test"/>
+
+</launch>
