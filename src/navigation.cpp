@@ -40,64 +40,43 @@ void Navigation::frontierCallback(
   tfListener->waitForTransform("/map", "/odom", ros::Time(0),
                                ros::Duration(3.0));
   tfListener->lookupTransform("/map", "/odom", ros::Time(0), transform);
+
   /*
-   *  /map topic start with all -1. frontierGoal is empty. rotate turtlebot
-   *  360 degree to update the /map topic
+   * calculate the frontier cell with minimal distance to the turtlebot and
+   * using move_base to move turtlebot there.
    */
-  if (frontierGoal.points.size() == 0) {
-    MoveBaseClient ac("move_base", true);
-    while (!ac.waitForServer(ros::Duration(5))) {
-      ROS_INFO("Waiting for the move_base action server to come up");
-    }
-    move_base_msgs::MoveBaseGoal goal;
-    goal.target_pose.header.frame_id = "map";
-    goal.target_pose.header.stamp = ros::Time::now();
-    goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
-        0, 0, 3.14);
-    ROS_INFO("come up 2");
-    ac.sendGoal(goal);
-    ac.waitForResult();
-    ROS_INFO("come up 3");
-  } else {
-    /*
-     * calculate the frontier cell with minimal distance to the turtlebot and
-     * using move_base to move turtlebot there.
-     */
-    int nearestGoalNum = Navigation::getNearestFrontier(frontierGoal,
-                                                        transform);
-    ROS_INFO("Closest frontier: %d", nearestGoalNum);
-    MoveBaseClient ac("move_base", true);
-    while (!ac.waitForServer(ros::Duration(10.0))) {
-      ROS_INFO("Waiting for the move_base action server to come up");
-    }
-    move_base_msgs::MoveBaseGoal goal;
-    goal.target_pose.header.frame_id = "map";
-    goal.target_pose.header.stamp = ros::Time::now();
-    goal.target_pose.pose.position.x = frontierGoal.points[nearestGoalNum].x;
-    goal.target_pose.pose.position.y = frontierGoal.points[nearestGoalNum].y;
-    goal.target_pose.pose.position.z = frontierGoal.points[nearestGoalNum].z;
-    goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
-        0, 0, 0);
-    ROS_INFO("Sending goal......Navigating to: x: %f y: %f",
+  int nearestGoalNum = Navigation::getNearestFrontier(frontierGoal, transform);
+  ROS_INFO("Closest frontier: %d", nearestGoalNum);
+  MoveBaseClient ac("move_base", true);
+  while (!ac.waitForServer(ros::Duration(10.0))) {
+    ROS_INFO("Waiting for the move_base action server to come up");
+  }
+  move_base_msgs::MoveBaseGoal goal;
+  goal.target_pose.header.frame_id = "map";
+  goal.target_pose.header.stamp = ros::Time::now();
+  goal.target_pose.pose.position.x = frontierGoal.points[nearestGoalNum].x;
+  goal.target_pose.pose.position.y = frontierGoal.points[nearestGoalNum].y;
+  goal.target_pose.pose.position.z = frontierGoal.points[nearestGoalNum].z;
+  goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
+      0, 0, 0);
+  ROS_INFO("Sending goal......Navigating to: x: %f y: %f",
+           goal.target_pose.pose.position.x, goal.target_pose.pose.position.y);
+  ac.sendGoal(goal);
+  ac.waitForResult(ros::Duration(45.0));
+  ROS_INFO("move_base goal published");
+  /*
+   * rotate turtlebot 360 degree after reach the frontier goal to update /map.
+   */
+  if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
+    ROS_INFO("Hooray, the base has moved to %f,%f",
              goal.target_pose.pose.position.x,
              goal.target_pose.pose.position.y);
+    goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
+        0, 0, 3.14);
     ac.sendGoal(goal);
-    ac.waitForResult(ros::Duration(45.0));
-    ROS_INFO("move_base goal published");
-    /*
-     * rotate turtlebot 360 degree after reach the frontier goal to update /map.
-     */
-    if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
-      ROS_INFO("Hooray, the base has moved to %f,%f",
-               goal.target_pose.pose.position.x,
-               goal.target_pose.pose.position.y);
-      goal.target_pose.pose.orientation =
-          tf::createQuaternionMsgFromRollPitchYaw(0, 0, 3.14);
-      ac.sendGoal(goal);
-      ac.waitForResult();
-    } else {
-      ROS_INFO("The base fail to move!");
-    }
+    ac.waitForResult();
+  } else {
+    ROS_INFO("The base fail to move!");
   }
 }
 

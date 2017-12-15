@@ -38,8 +38,6 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
       frontierEdgeCell.push_back(i);
     }
   }
-  int q1 = frontierEdgeCell.size();
-  ROS_INFO("sssssssss , %d", q1);
   /*
    * check every possibilities of connected cells and add them to different Open list,
    * erase one position in an Open list after using it finding all connected edge cells.
@@ -84,6 +82,7 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
       frontierEdgeClose[i].push_back(frontierCellUsed);
       frontierEdgeOpen.erase(frontierEdgeOpen.begin());
     }
+
     for (int j = 0; j < frontierEdgeClose[i].size(); ++j) {
       for (int k = 0; k < frontierEdgeCell.size(); ++k) {
         if (frontierEdgeClose[i][j] == frontierEdgeCell[k]) {
@@ -92,10 +91,7 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
       }
     }
     i += 1;
-    ROS_INFO("cut!");
   }
-  int z = frontierEdgeClose.size();
-  ROS_INFO("come up %d", z);
   /*
    * find median position of all the edges longer than 0.2m, which is a
    * little bigger than turtlebot's diameter.
@@ -114,12 +110,6 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
       median.push_back(frontierEdgeClose[i][frontierEdgeClose[i].size() / 2]);
     }
   }
-  int x = median.size();
-  int x1 = median[0];
-  int x2 = median[1];
-  int x3 = median[2];
-  int x4 = median[3];
-  ROS_INFO("median size %d,%d,%d,%d,%d", x, x1, x2, x3, x4);
   /*
    * set frontier possible values in frontierGoal msg
    */
@@ -133,16 +123,7 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
             * map->info.resolution);
     frontierGoal.points[i].z = float(0);
   }
-  float y1 = Frontier::frontierGoal.points[0].x;
-  float y2 = Frontier::frontierGoal.points[0].y;
-  float y3 = Frontier::frontierGoal.points[1].x;
-  float y4 = Frontier::frontierGoal.points[1].y;
-  float y5 = Frontier::frontierGoal.points[2].x;
-  float y6 = Frontier::frontierGoal.points[2].y;
-  float y7 = Frontier::frontierGoal.points[3].x;
-  float y8 = Frontier::frontierGoal.points[3].y;
-  ROS_INFO("points size %f,%f,%f,%f,%f,%f,%f,%f", y1, y2, y3, y4, y5, y6, y7,
-           y8);
+  ROS_INFO("The positions of frontier median points have been published!");
 }
 
 /**
