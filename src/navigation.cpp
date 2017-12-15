@@ -45,9 +45,42 @@ void Navigation::frontierCallback(
   if (frontierGoal.points.size() == 0)
     return;
   /*
+  int nearestGoalNum = Navigation::getNearestFrontier(frontierGoal, transform);
+  ROS_INFO("Closest frontier: %d", nearestGoalNum);
+  move_base_msgs::MoveBaseGoal goal;
+  goal.target_pose.header.frame_id = "map";
+  goal.target_pose.header.stamp = ros::Time::now();
+  goal.target_pose.pose.position.x = frontierGoal.points[nearestGoalNum].x;
+  goal.target_pose.pose.position.y = frontierGoal.points[nearestGoalNum].y;
+  goal.target_pose.pose.position.z = frontierGoal.points[nearestGoalNum].z;
+  goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
+      0, 0, 0);
+  ROS_INFO("Sending goal......Navigating to: x: %f y: %f",
+           goal.target_pose.pose.position.x, goal.target_pose.pose.position.y);
+  MoveBaseClient ac("move_base", true);
+  while (!ac.waitForServer(ros::Duration(10.0))) {
+    ROS_INFO("Waiting for the move_base action server to come up");
+  }
+  ac.sendGoal(goal);
+  ac.waitForResult(ros::Duration(45.0));
+  ROS_INFO("move_base goal published");
+  if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
+    ROS_INFO("Hooray, the base has moved to %f,%f",
+             goal.target_pose.pose.position.x,
+             goal.target_pose.pose.position.y);
+    goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
+        0, 0, 3.14);
+    ac.sendGoal(goal);
+    ac.waitForResult();
+  } else {
+    ROS_INFO("The base failed to move forward 1 meter for some reason");
+  }
+   */
+  /*
    * calculate the frontier cell with minimal distance to the turtlebot and
    * using move_base to move turtlebot there.
    */
+
   int nearestGoalNum = Navigation::getNearestFrontier(frontierGoal, transform);
   ROS_INFO("Closest frontier: %d", nearestGoalNum);
   move_base_msgs::MoveBaseGoal goal;
@@ -63,10 +96,9 @@ void Navigation::frontierCallback(
     attempts++;
     goal.target_pose.pose.position.x = frontierGoal.points[nearestGoalNum].x;
     goal.target_pose.pose.position.y = frontierGoal.points[nearestGoalNum].y;
-//    goal.target_pose.pose.position.z = frontierGoal.points[nearestGoalNum].z;
-//    goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
-    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(0);
-    goal.target_pose.pose.orientation = odom_quat;
+    goal.target_pose.pose.position.z = frontierGoal.points[nearestGoalNum].z;
+    goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(
+        0, 0, 0);
     ROS_INFO("Sending goal......Navigating to: x: %f y: %f",
              goal.target_pose.pose.position.x,
              goal.target_pose.pose.position.y);
@@ -77,22 +109,25 @@ void Navigation::frontierCallback(
     ac.sendGoal(goal);
     ac.waitForResult(ros::Duration(45.0));
     ROS_INFO("move_base goal published");
+
     /*
      * rotate turtlebot 360 degree after reach the frontier goal to update /map.
      */
+
     if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
       at_target = true;
       ROS_INFO("Hooray, the base has moved to %f,%f",
                goal.target_pose.pose.position.x,
                goal.target_pose.pose.position.y);
-//      goal.target_pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 3.14);
-      geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(
-          3.14);
-      goal.target_pose.pose.orientation = odom_quat;
+      goal.target_pose.pose.orientation =
+          tf::createQuaternionMsgFromRollPitchYaw(0, 0, 3.14);
       ac.sendGoal(goal);
       ac.waitForResult();
+    } else {
+      ROS_INFO("The base failed to move forward 1 meter for some reason");
     }
   }
+
 }
 
 /*
@@ -109,7 +144,7 @@ int Navigation::getNearestFrontier(const sensor_msgs::PointCloud frontierGoal,
         pow((float(frontierGoal.points[i].x - transform.getOrigin().x())), 2.0)
             + pow((float(frontierGoal.points[i].y - transform.getOrigin().y())),
                   2.0));
-    if (length > 0.7 && length < shortestLength) {
+    if (length > 0.5 && length < shortestLength) {
       shortestLength = length;
       nearestGoalNum = i;
     }
@@ -133,7 +168,7 @@ int main(int argc, char **argv) {
                                                   &Navigation::frontierCallback,
                                                   &autoNavigator);
   ROS_INFO("INFO! Navigation Started");
-  ros::Rate loop_rate(50);
+  ros::Rate loop_rate(30);
   while (ros::ok() && n.ok()) {
     ros::spinOnce();
     loop_rate.sleep();

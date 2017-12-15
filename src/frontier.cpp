@@ -96,8 +96,10 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
     i += 1;
   }
   /*
-   * find median position of all the edges longer than 0.1m, which is a
+   * OLD: find median position of all the edges longer than 0.1m, which is a
    * little bigger than turtlebot's diameter.
+   * NEW: sensor is not accurate. it put some 100 values between unknown frontiers.
+   * DON't treat it serious! define 2 frontier cells in a row as the available frontier.
    */
   std::vector<int> median;
   for (int i = 0; i < frontierEdgeClose.size(); ++i) {
@@ -110,11 +112,11 @@ void Frontier::frontierTarget(const nav_msgs::OccupancyGrid::ConstPtr& map) {
     y[1] = frontierEdgeClose[i].back() / map->info.width;
     float edgeLength = sqrt(float((x[1] - x[0]) ^ 2 + (y[1] - y[0]) ^ 2))
         * map->info.resolution;
-    if (edgeLength > 0.1) {
+     if (edgeLength > 0.01) {
       median.push_back(frontierEdgeClose[i][frontierEdgeClose[i].size() / 2]);
     }
      */
-    if (frontierEdgeClose[i].size() > 2) {
+    if (frontierEdgeClose[i].size() > 1) {
       median.push_back(frontierEdgeClose[i][frontierEdgeClose[i].size() / 2]);
     }
   }
