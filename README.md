@@ -44,7 +44,7 @@ UML Activity Diagram for navigation:
 https://drive.google.com/a/terpmail.umd.edu/file/d/161zBalcv-rCE0iNJbwVsMLsyn225hA_Y/view?usp=sharing
 
 ## Demo video
-Video: https://youtube.be/YgnYJZwm2fs
+Video: https://youtu.be/YgnYJZwm2fs
 
 PPT: https://docs.google.com/a/terpmail.umd.edu/presentation/d/1kRmysa4oBWb_NNsi8qdF4qPpMcRfTe3Escjh5DqZTek/edit?usp=sharing
 
