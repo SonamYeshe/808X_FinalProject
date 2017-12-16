@@ -1,5 +1,5 @@
 # 808X_FinalProject
-Final project of software development course.
+Final project of software development course. Turtlebot can explore an unknown world autonomously.
 
 [![Build Status](https://travis-ci.org/SonamYeshe/808X_FinalProject.svg?branch=master)](https://travis-ci.org/SonamYeshe/808X_FinalProject)
 [![Coverage Status](https://coveralls.io/repos/github/SonamYeshe/808X_FinalProject/badge.svg?branch=master)](https://coveralls.io/github/SonamYeshe/808X_FinalProject?branch=master)
@@ -37,5 +37,7 @@ $ roslaunch finalproject turtlebot_world.launch world_file:=`rospack find finalp
 
 roslaunch finalproject nav_stack.launch
 
+## Doxygen
+$ sudo apt install doxygen
 
 
