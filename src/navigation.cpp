@@ -64,7 +64,7 @@ void Navigation::frontierCallback(
     ROS_INFO("Waiting for the move_base action server to come up");
   }
   ac.sendGoal(goal);
-  ac.waitForResult(ros::Duration(30.0));
+  ac.waitForResult(ros::Duration(15.0));
   ROS_INFO("move_base goal published");
   if (ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
     ROS_INFO("Hooray, the base has moved to %f,%f",
