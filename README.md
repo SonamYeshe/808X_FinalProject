@@ -1,5 +1,5 @@
 # 808X_FinalProject
-Final project of software development course. Everytime we start up a 2d world file, we can use this software to ask turtlebot explore it autonoumously. We don't need to use teleop key to manually do that anymore!
+Final project of software development course. Everytime we start up a 2d world file, we can use this software to ask turtlebot explore it autonomously. We don't need to use teleop key to manually do that anymore!
 
 [![Build Status](https://travis-ci.org/SonamYeshe/808X_FinalProject.svg?branch=master)](https://travis-ci.org/SonamYeshe/808X_FinalProject)
 [![Coverage Status](https://coveralls.io/repos/github/SonamYeshe/808X_FinalProject/badge.svg?branch=master)](https://coveralls.io/github/SonamYeshe/808X_FinalProject?branch=master)
@@ -89,3 +89,8 @@ $ ../cpplint.py $( find . -name \*.hpp -or -name \*.cpp | grep -vE -e "^./build/
 $ roscd finalproject/
 $ cppcheck --enable=all --std=c++11 --includes-file=cppcheck.txt --check-config --suppress=missingIncludeSystem $( find . -name *.cpp | grep -vE -e "^./build/" -e "^./vendor/" )
 ```
+
+## Reference
+http://ieeexplore.ieee.org/document/613851/
+https://github.com/tpepels/turtlebot_slam
+
