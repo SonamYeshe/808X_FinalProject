@@ -26,27 +26,27 @@ Jiawei Ge(SonamYeshe), hereby disclaims all copyright interest in the program `f
 6. ROS packages: stage_ros, rviz, slam_gmapping, move_base.
 
 ## Backlog and Sprint google spreadsheet
-Backlog: https://docs.google.com/a/terpmail.umd.edu/spreadsheets/d/1Yvd1-wER0aqfgY3TEJp908nOtQcfq_xC7EuNYKqGUYw/edit?usp=sharing
+Backlog: https://docs.google.com/spreadsheets/d/1Yvd1-wER0aqfgY3TEJp908nOtQcfq_xC7EuNYKqGUYw/edit?usp=sharing
 
-Sprint: https://docs.google.com/a/terpmail.umd.edu/document/d/1eefyruMA5AlBzoHlFuDsTt1-XJztjlX6wcgxyxrt5PQ/edit?usp=sharing
+Sprint: https://docs.google.com/document/d/1eefyruMA5AlBzoHlFuDsTt1-XJztjlX6wcgxyxrt5PQ/edit?usp=sharing
 
 ## UML design
 UML Class Diagram for frontier:
-https://drive.google.com/a/terpmail.umd.edu/file/d/1SPhiz5TIXWj1EcMbA_ZcNvGMOR5UEW9L/view?usp=sharing
+https://drive.google.com/file/d/1SPhiz5TIXWj1EcMbA_ZcNvGMOR5UEW9L/view?usp=sharing
 
 UML Class Diagram for navigation:
-https://drive.google.com/a/terpmail.umd.edu/file/d/18OaFoiMPZx2ztfEumjQeb-R7rY_oi3jj/view?usp=sharing
+https://drive.google.com/file/d/18OaFoiMPZx2ztfEumjQeb-R7rY_oi3jj/view?usp=sharing
 
 UML Activity Diagram for frontier:
-https://drive.google.com/a/terpmail.umd.edu/file/d/1x55BHgdjT7aoJMb38gkIQyQikabvKMTB/view?usp=sharing
+https://drive.google.com/file/d/1x55BHgdjT7aoJMb38gkIQyQikabvKMTB/view?usp=sharing
 
 UML Activity Diagram for navigation:
-https://drive.google.com/a/terpmail.umd.edu/file/d/161zBalcv-rCE0iNJbwVsMLsyn225hA_Y/view?usp=sharing
+https://drive.google.com/file/d/161zBalcv-rCE0iNJbwVsMLsyn225hA_Y/view?usp=sharing
 
 ## Demo video
 Video: https://youtu.be/YgnYJZwm2fs
 
-PPT: https://docs.google.com/a/terpmail.umd.edu/presentation/d/1kRmysa4oBWb_NNsi8qdF4qPpMcRfTe3Escjh5DqZTek/edit?usp=sharing
+PPT: https://docs.google.com/presentation/d/1kRmysa4oBWb_NNsi8qdF4qPpMcRfTe3Escjh5DqZTek/edit?usp=sharing
 
 ## Build
 
